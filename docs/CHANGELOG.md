@@ -1,5 +1,10 @@
 # Changelog
 
+## 19.10.2026 - Version 2.0.1
+
+### Fixes
+- Die Instanz lässt sich unter Symcon 9.0 wieder anlegen, vorher brach das Anlegen mit "Undefined constant" ab.
+
 ## 18.10.2026 - Version 2.0
 
 ### Neu
