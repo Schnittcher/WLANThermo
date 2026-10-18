@@ -3,7 +3,10 @@
     "author": "Kai Schnittcher",
     "name": "WLANThermo",
     "url": "https://github.com/Schnittcher/IPS-WLANThermo",
-    "version": "1.1.1",
+    "version": "2.0",
     "build": 0,
-    "date": 0
+    "date": 0,
+    "compatibility": {
+        "version": "9.0"
+    }
 }
