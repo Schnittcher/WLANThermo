@@ -36,7 +36,9 @@ class WLANThermo extends IPSModuleStrict
         $this->RegisterAttributeString('Unit', 'C');
         $this->RegisterAttributeBoolean('Autotune', false);
 
-        $this->SetVisualizationType(defined('INSTANCE_VISUALIZATION_TYPE_HTML_FULLSCREEN') ? INSTANCE_VISUALIZATION_TYPE_HTML_FULLSCREEN : INSTANCE_VISUALIZATION_TYPE_HTML);
+        //Die Konstanten für den Kachel-Typ gibt es erst ab Symcon 9.1, auf 9.0 fehlt auch INSTANCE_VISUALIZATION_TYPE_HTML.
+        //Deshalb steht für HTML der Wert 1. Der Vollbildtyp braucht 9.1, davor bleibt die maximierte Ansicht leer.
+        $this->SetVisualizationType(defined('INSTANCE_VISUALIZATION_TYPE_HTML_FULLSCREEN') ? INSTANCE_VISUALIZATION_TYPE_HTML_FULLSCREEN : 1);
     }
 
     public function ApplyChanges(): void
