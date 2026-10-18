@@ -1,0 +1,207 @@
+<style>
+#wt {
+    --ok: #1d9e75;
+    --bad: #e24b4a;
+    --track: color-mix(in srgb, var(--content-color) 14%, transparent);
+    --line: color-mix(in srgb, var(--content-color) 16%, transparent);
+    --soft: color-mix(in srgb, var(--content-color) 60%, transparent);
+    position: relative;
+    box-sizing: border-box;
+    overflow-y: auto;
+    font: inherit;
+}
+#wt * { box-sizing: border-box; }
+#wt { padding-right: 0.7em; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--content-color) 30%, transparent) transparent; }
+#wt::-webkit-scrollbar { width: 0.35em; }
+#wt::-webkit-scrollbar-track { background: transparent; }
+#wt::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--content-color) 30%, transparent); border-radius: 0.2em; }
+#wt::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+#wt .head { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.7em; color: var(--soft); font-size: 0.85em; }
+#wt .head span { margin-left: 1em; }
+#wt .dot { display: inline-block; width: 0.6em; height: 0.6em; border-radius: 50%; margin-right: 0.35em; }
+#wt .card { border: 1px solid var(--line); border-radius: 0.6em; padding: 0.6em 0.8em; margin-bottom: 0.5em; }
+#wt .card.alarm { border-color: var(--bad); }
+#wt .card.off { opacity: 0.5; }
+#wt .row { display: flex; justify-content: space-between; align-items: center; gap: 0.5em; }
+#wt .name { display: flex; align-items: center; min-width: 0; }
+#wt .name .dot { flex: none; width: 0.7em; height: 0.7em; margin-right: 0.5em; }
+#wt .name b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
+#wt .temp { font-size: 1.4em; font-weight: 700; white-space: nowrap; }
+#wt .temp.bad { color: var(--bad); }
+#wt .temp.na { font-size: 1em; font-weight: 400; color: var(--soft); }
+#wt .bar { position: relative; height: 0.4em; border-radius: 0.2em; background: var(--track); margin: 0.7em 0 0.35em; }
+#wt .range { position: absolute; top: 0; height: 100%; border-radius: 0.2em; background: color-mix(in srgb, var(--ok) 45%, transparent); }
+#wt .mark { position: absolute; top: -0.25em; width: 0.22em; height: 0.9em; margin-left: -0.11em; border-radius: 0.1em; background: var(--content-color); }
+#wt .mark.bad { background: var(--bad); }
+#wt .fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 0.2em; background: var(--accent-color); }
+#wt .scale { display: flex; justify-content: space-between; align-items: center; font-size: 0.8em; color: var(--soft); }
+#wt .scale .msg { color: var(--bad); font-weight: 700; }
+#wt .small { font-size: 0.85em; color: var(--soft); }
+#wt button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 0.4em; padding: 0.3em 0.7em; cursor: pointer; }
+#wt button.icon { padding: 0.25em 0.4em; line-height: 0; }
+#wt button.on { background: var(--accent-color); border-color: var(--accent-color); color: var(--card-color); font-weight: 700; }
+#wt .seg { display: flex; gap: 0.5em; margin-top: 0.7em; }
+#wt .seg button { flex: 1; border: 0; border-radius: 0.4em; padding: 0.45em 0.4em; font-weight: 700; background: color-mix(in srgb, var(--content-color) 14%, transparent); }
+#wt .seg button.on { background: var(--accent-color); color: #fff; }
+#wt .empty { color: var(--soft); text-align: center; padding: 1.5em 0; }
+#wt .modal { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: color-mix(in srgb, var(--content-color) 35%, transparent); }
+#wt .modal.show { display: flex; }
+#wt .dlg { width: min(22em, 92%); background: var(--card-color); border: 1px solid var(--line); border-radius: 0.7em; padding: 1em; }
+#wt .dlg h3 { margin: 0 0 0.8em; font-size: 1.05em; font-weight: 700; }
+#wt .dlg label { display: block; margin-bottom: 0.7em; font-size: 0.9em; color: var(--soft); }
+#wt .dlg input, #wt .dlg select { display: block; width: 100%; margin-top: 0.25em; font: inherit; color: var(--content-color); background: transparent; border: 1px solid var(--line); border-radius: 0.4em; padding: 0.4em 0.5em; }
+#wt .dlg .btns { display: flex; justify-content: flex-end; gap: 0.5em; margin-top: 0.8em; }
+#wt .dlg option { color: #000; }
+#wt .dlg .btns button { border: 0; border-radius: 0.4em; padding: 0.45em 1em; font-weight: 700; background: color-mix(in srgb, var(--content-color) 14%, transparent); }
+#wt .dlg .btns button.on { background: var(--accent-color); color: #fff; }
+</style>
+<div id="wt">
+    <div class="head" id="wt-head"></div>
+    <div id="wt-list"></div>
+    <div id="wt-pm"></div>
+    <div class="modal" id="wt-modal"><div class="dlg" id="wt-dlg"></div></div>
+</div>
+<script>
+var wt = { data: null };
+
+function wtEsc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+}
+
+function wtNum(v, digits) {
+    return Number(v).toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+function wtFit() {
+    var s = getComputedStyle(document.body);
+    var h = window.innerHeight - (parseFloat(s.marginTop) || 0) - (parseFloat(s.marginBottom) || 0);
+    document.getElementById('wt').style.height = h + 'px';
+}
+window.addEventListener('resize', wtFit);
+
+function wtScale(c) {
+    var lo = Math.min(c.min, c.temp), hi = Math.max(c.max, c.temp);
+    var pad = Math.max((hi - lo) * 0.15, 5);
+    lo -= pad;
+    hi += pad;
+    return { lo: lo, span: hi - lo };
+}
+
+function wtChannel(c, d) {
+    var t = d.texts;
+    if (!c.connected || c.temp === null) {
+        return '<div class="card off"><div class="row"><div class="name"><i class="dot" style="background:' + wtEsc(c.color) + '"></i><b>' + wtEsc(c.name) + '</b></div><div class="temp na">' + wtEsc(t.notConnected) + '</div></div></div>';
+    }
+    var sc = wtScale(c);
+    var pos = function (v) { return Math.max(0, Math.min(100, (v - sc.lo) / sc.span * 100)); };
+    var above = c.temp > c.max, below = c.temp < c.min;
+    var out = above || below;
+    var alarm = out && c.alarm > 0;
+    var msg = above ? t.above : (below ? t.below : '');
+    return '<div class="card' + (alarm ? ' alarm' : '') + '">' +
+        '<div class="row"><div class="name"><i class="dot" style="background:' + wtEsc(c.color) + '"></i><b>' + wtEsc(c.name) + '</b></div>' +
+        '<div class="row"><div class="temp' + (out ? ' bad' : '') + '">' + wtNum(c.temp, 1) + ' °' + wtEsc(d.unit) + '</div>' +
+        '<button class="icon" title="' + wtEsc(t.settings) + '" onclick="wtOpenChannel(' + c.number + ')">' + wtIcon() + '</button></div></div>' +
+        '<div class="bar"><div class="range" style="left:' + pos(c.min) + '%;width:' + (pos(c.max) - pos(c.min)) + '%"></div>' +
+        '<div class="mark' + (out ? ' bad' : '') + '" style="left:' + pos(c.temp) + '%"></div></div>' +
+        '<div class="scale"><span>' + wtEsc(t.min) + ' ' + wtNum(c.min, 0) + '</span><span class="msg">' + (out ? wtEsc(msg) : '') + '</span><span>' + wtEsc(t.max) + ' ' + wtNum(c.max, 0) + '</span></div></div>';
+}
+
+function wtIcon() {
+    return '<svg viewBox="0 0 16 16" width="1.1em" height="1.1em" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2 4h3M9 4h5M2 8h7M13 8h1M2 12h1M7 12h7"/><circle cx="7" cy="4" r="1.6"/><circle cx="11" cy="8" r="1.6"/><circle cx="5" cy="12" r="1.6"/></svg>';
+}
+
+function wtPitmaster(p, d) {
+    var t = d.texts;
+    var modes = [['off', t.off], ['manual', t.manual], ['auto', t.auto]];
+    if (d.autotune) { modes.push(['autotune', t.autotune]); }
+    var seg = modes.map(function (m, i) {
+        return '<button class="' + (p.mode === i ? 'on' : '') + '" onclick="wtMode(' + p.id + ',' + i + ')">' + wtEsc(m[1]) + '</button>';
+    }).join('');
+    var info = [];
+    if (p.channelName) { info.push(wtEsc(p.channelName)); }
+    if (p.pid) { info.push(wtEsc(p.pid)); }
+    return '<div class="card"><div class="row"><div class="name"><b>' + wtEsc(t.pitmaster) + ' ' + (p.id + 1) + '</b></div>' +
+        '<div class="row"><div class="temp">' + wtNum(p.set, 0) + ' °' + wtEsc(d.unit) + '</div>' +
+        '<button class="icon" title="' + wtEsc(t.settings) + '" onclick="wtOpenPitmaster(' + p.id + ')">' + wtIcon() + '</button></div></div>' +
+        '<div class="small">' + wtEsc(t.target) + (info.length ? ' · ' + info.join(' · ') : '') + '</div>' +
+        '<div class="bar"><div class="fill" style="width:' + Math.max(0, Math.min(100, p.value)) + '%"></div></div>' +
+        '<div class="scale"><span>' + wtEsc(t.value) + ' ' + wtNum(p.value, 0) + ' %</span><span>100 %</span></div>' +
+        '<div class="seg">' + seg + '</div></div>';
+}
+
+function handleMessage(message) {
+    var d = typeof message === 'string' ? JSON.parse(message) : message;
+    wt.data = d;
+    wtFit();
+    var s = d.system || {};
+    var head = '';
+    if (s.online !== null && s.online !== undefined) {
+        var col = s.online === 2 ? 'var(--ok)' : (s.online === 1 ? '#ef9f27' : 'var(--bad)');
+        head += '<span><i class="dot" style="background:' + col + '"></i>' + wtEsc(d.texts.cloud) + '</span>';
+    }
+    if (s.soc !== null && s.soc !== undefined) { head += '<span>' + wtEsc(s.soc) + ' %' + (s.charge ? ' · ' + wtEsc(d.texts.charging) : '') + '</span>'; }
+    if (s.rssi !== null && s.rssi !== undefined) { head += '<span>' + wtEsc(s.rssi) + ' dBm</span>'; }
+    document.getElementById('wt-head').innerHTML = head;
+
+    var list = document.getElementById('wt-list');
+    list.innerHTML = d.channels.length ? d.channels.map(function (c) { return wtChannel(c, d); }).join('') : '<div class="empty">' + wtEsc(d.texts.empty) + '</div>';
+    document.getElementById('wt-pm').innerHTML = d.pitmasters.map(function (p) { return wtPitmaster(p, d); }).join('');
+}
+
+function wtMode(id, mode) {
+    requestAction('TilePitmasterMode', JSON.stringify({ id: id, mode: mode }));
+}
+
+function wtShow(html) {
+    document.getElementById('wt-dlg').innerHTML = html;
+    document.getElementById('wt-modal').classList.add('show');
+}
+
+function wtClose() {
+    document.getElementById('wt-modal').classList.remove('show');
+}
+
+function wtOpenChannel(n) {
+    var d = wt.data, t = d.texts;
+    var c = d.channels.filter(function (x) { return x.number === n; })[0];
+    if (!c) { return; }
+    var opts = [0, 1, 2, 3].map(function (i) {
+        return '<option value="' + i + '"' + (c.alarm === i ? ' selected' : '') + '>' + wtEsc(t['alarm' + i]) + '</option>';
+    }).join('');
+    wtShow('<h3>' + wtEsc(c.name) + '</h3>' +
+        '<label>' + wtEsc(t.min) + ' (°' + wtEsc(d.unit) + ')<input id="wt-min" type="number" step="0.5" min="-30" max="999.9" value="' + c.min + '"></label>' +
+        '<label>' + wtEsc(t.max) + ' (°' + wtEsc(d.unit) + ')<input id="wt-max" type="number" step="0.5" min="-30" max="999.9" value="' + c.max + '"></label>' +
+        '<label>' + wtEsc(t.alarm) + '<select id="wt-alarm">' + opts + '</select></label>' +
+        '<div class="btns"><button onclick="wtClose()">' + wtEsc(t.cancel) + '</button><button class="on" onclick="wtSaveChannel(' + n + ')">' + wtEsc(t.save) + '</button></div>');
+}
+
+function wtSaveChannel(n) {
+    var min = parseFloat(document.getElementById('wt-min').value);
+    var max = parseFloat(document.getElementById('wt-max').value);
+    var alarm = parseInt(document.getElementById('wt-alarm').value, 10);
+    if (isNaN(min) || isNaN(max)) { return; }
+    requestAction('TileSetChannel', JSON.stringify({ channel: n, min: min, max: max, alarm: alarm }));
+    wtClose();
+}
+
+function wtOpenPitmaster(id) {
+    var d = wt.data, t = d.texts;
+    var p = d.pitmasters.filter(function (x) { return x.id === id; })[0];
+    if (!p) { return; }
+    wtShow('<h3>' + wtEsc(t.pitmaster) + ' ' + (id + 1) + '</h3>' +
+        '<label>' + wtEsc(t.target) + ' (°' + wtEsc(d.unit) + ')<input id="wt-set" type="number" step="1" min="0" max="999.9" value="' + p.set + '"></label>' +
+        '<label>' + wtEsc(t.value) + ' (%)<input id="wt-value" type="number" step="1" min="0" max="100" value="' + p.value + '"></label>' +
+        '<div class="btns"><button onclick="wtClose()">' + wtEsc(t.cancel) + '</button><button class="on" onclick="wtSavePitmaster(' + id + ')">' + wtEsc(t.save) + '</button></div>');
+}
+
+function wtSavePitmaster(id) {
+    var set = parseFloat(document.getElementById('wt-set').value);
+    var value = parseInt(document.getElementById('wt-value').value, 10);
+    if (isNaN(set) || isNaN(value)) { return; }
+    requestAction('TilePitmaster', JSON.stringify({ id: id, set: set, value: value }));
+    wtClose();
+}
+</script>
