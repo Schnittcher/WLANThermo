@@ -4,16 +4,202 @@
             "type": "ValidationTextBox",
             "name": "MQTTTopic",
             "caption": "MQTT Topic"
+        },
+        {
+            "type": "CheckBox",
+            "name": "HideDisconnected",
+            "caption": "Hide disconnected channels in the tile"
         }
     ],
     "actions": [
         {
-            "type": "Label",
-            "caption": "Spenden / Schenkung"
+            "type": "RowLayout",
+            "items": [
+                {
+                    "type": "Button",
+                    "caption": "Get data",
+                    "onClick": "WTHERMO_getData($id);"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Get settings",
+                    "onClick": "WTHERMO_getSettings($id);"
+                }
+            ]
         },
         {
             "type": "Label",
-            "caption": "Dieses Modul ist für die nicht kommerzielle Nutzung kostenlos, Schenkungen als Unterstützung für den Autor werden hier akzeptiert:    "
+            "name": "DeviceInfo",
+            "caption": "Device: no settings received yet"
+        },
+        {
+            "type": "Label",
+            "name": "FormMessage",
+            "caption": ""
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "System",
+            "items": [
+                {
+                    "type": "Label",
+                    "caption": "Note: The host name determines the MQTT topic. After a change, adjust the topic of the instance."
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "SysAp",
+                    "caption": "AP name (max. 13 characters)"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "SysHost",
+                    "caption": "Host name (max. 13 characters)"
+                },
+                {
+                    "type": "Select",
+                    "name": "SysLanguage",
+                    "caption": "Language",
+                    "options": [
+                        {
+                            "caption": "German",
+                            "value": "de"
+                        },
+                        {
+                            "caption": "English",
+                            "value": "en"
+                        }
+                    ]
+                },
+                {
+                    "type": "Select",
+                    "name": "SysUnit",
+                    "caption": "Unit",
+                    "options": [
+                        {
+                            "caption": "Celsius",
+                            "value": "C"
+                        },
+                        {
+                            "caption": "Fahrenheit",
+                            "value": "F"
+                        }
+                    ]
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "SysAutoupd",
+                    "caption": "Check for updates automatically"
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "SysPrerelease",
+                    "caption": "Include pre-releases"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Apply system settings",
+                    "onClick": "IPS_RequestAction($id, 'ApplySystem', json_encode(['ap' => $SysAp, 'host' => $SysHost, 'language' => $SysLanguage, 'unit' => $SysUnit, 'autoupd' => $SysAutoupd, 'prerelease' => $SysPrerelease]));"
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "PID profiles",
+            "items": [
+                {
+                    "type": "Select",
+                    "name": "PIDId",
+                    "caption": "Profile",
+                    "options": [],
+                    "onChange": "IPS_RequestAction($id, 'PIDSelect', $PIDId);"
+                },
+                {
+                    "type": "ValidationTextBox",
+                    "name": "PIDName",
+                    "caption": "Name"
+                },
+                {
+                    "type": "Select",
+                    "name": "PIDAktor",
+                    "caption": "Actuator",
+                    "options": []
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PIDKp",
+                    "caption": "Kp",
+                    "digits": 2
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PIDKi",
+                    "caption": "Ki",
+                    "digits": 3
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PIDKd",
+                    "caption": "Kd",
+                    "digits": 2
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PIDDCmmin",
+                    "caption": "Control value minimum",
+                    "suffix": "%",
+                    "minimum": 0,
+                    "maximum": 100
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PIDDCmmax",
+                    "caption": "Control value maximum",
+                    "suffix": "%",
+                    "minimum": 0,
+                    "maximum": 100
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PIDJp",
+                    "caption": "Jump Power",
+                    "suffix": "%",
+                    "minimum": 10,
+                    "maximum": 100
+                },
+                {
+                    "type": "CheckBox",
+                    "name": "PIDOpl",
+                    "caption": "Lid open detection"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PIDSPmin",
+                    "caption": "Servo minimum"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PIDSPmax",
+                    "caption": "Servo maximum"
+                },
+                {
+                    "type": "NumberSpinner",
+                    "name": "PIDLink",
+                    "caption": "Link"
+                },
+                {
+                    "type": "Button",
+                    "caption": "Apply profile",
+                    "onClick": "IPS_RequestAction($id, 'ApplyPID', json_encode(['id' => $PIDId, 'name' => $PIDName, 'aktor' => $PIDAktor, 'Kp' => $PIDKp, 'Ki' => $PIDKi, 'Kd' => $PIDKd, 'DCmmin' => $PIDDCmmin, 'DCmmax' => $PIDDCmmax, 'jp' => $PIDJp, 'opl' => $PIDOpl, 'SPmin' => $PIDSPmin, 'SPmax' => $PIDSPmax, 'link' => $PIDLink]));"
+                }
+            ]
+        },
+        {
+            "type": "Label",
+            "caption": "Donations"
+        },
+        {
+            "type": "Label",
+            "caption": "This module is free for non-commercial use. Donations to support the author are accepted here:    "
         },
         {
             "type": "RowLayout",
