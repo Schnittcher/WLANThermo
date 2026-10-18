@@ -39,7 +39,7 @@ final class LocalizationTest extends TestCase
 
     public function testDonationBlockIsTheTemplateWithTranslations(): void
     {
-        $form = json_decode((string) file_get_contents(__DIR__ . '/../IPS-WLANThermo/form.json'), true);
+        $form = json_decode((string) file_get_contents(__DIR__ . '/../WLANThermo/form.json'), true);
         $german = $this->germanTranslations();
 
         $this->assertSame('Donations', $form['actions'][count($form['actions']) - 3]['caption']);
@@ -49,14 +49,14 @@ final class LocalizationTest extends TestCase
 
     private function germanTranslations(): array
     {
-        $locale = json_decode((string) file_get_contents(__DIR__ . '/../IPS-WLANThermo/locale.json'), true);
+        $locale = json_decode((string) file_get_contents(__DIR__ . '/../WLANThermo/locale.json'), true);
         return $locale['translations']['de'];
     }
 
     // Alle Schlüssel, die module.php an Translate() übergibt
     private function translateKeys(): array
     {
-        $code = (string) file_get_contents(__DIR__ . '/../IPS-WLANThermo/module.php');
+        $code = (string) file_get_contents(__DIR__ . '/../WLANThermo/module.php');
         preg_match_all("/Translate\\('((?:[^'\\\\]|\\\\.)*)'\\)/", $code, $matches);
         return array_values(array_unique($matches[1]));
     }
@@ -64,7 +64,7 @@ final class LocalizationTest extends TestCase
     // Alle Beschriftungen der form.json (caption), auch die des Spendenblocks
     private function formTexts(): array
     {
-        $form = json_decode((string) file_get_contents(__DIR__ . '/../IPS-WLANThermo/form.json'), true);
+        $form = json_decode((string) file_get_contents(__DIR__ . '/../WLANThermo/form.json'), true);
         $texts = [];
         array_walk_recursive($form, function ($value, $key) use (&$texts)
         {

@@ -1,13 +1,13 @@
 [![Version](https://img.shields.io/badge/Symcon-PHPModul-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
 ![Version](https://img.shields.io/badge/Symcon%20Version-9.0%20%3E-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Check Style](https://github.com/Schnittcher/IPS-WLANThermo/actions/workflows/style.yml/badge.svg)](https://github.com/Schnittcher/IPS-WLANThermo/actions/workflows/style.yml)
+[![Check Style](https://github.com/Schnittcher/WLANThermo/actions/workflows/style.yml/badge.svg)](https://github.com/Schnittcher/WLANThermo/actions/workflows/style.yml)
 
-# IPS-WLANThermo
+# WLANThermo
 Dieses Modul verbindet WLANThermo (ESP32 und Nano V1) per MQTT mit IP-Symcon. Es liest Kanäle, Pitmaster und Systemwerte, ändert sie über das Gerät und zeigt alles in einer Kachel.
 
 ## Inhaltsverzeichnis
-- [IPS-WLANThermo](#ips-wlanthermo)
+- [WLANThermo](#wlanthermo)
   - [Inhaltsverzeichnis](#inhaltsverzeichnis)
   - [Screenshots](#screenshots)
   - [1. Voraussetzungen](#1-voraussetzungen)
@@ -49,7 +49,7 @@ Die einzelnen Funktionen stehen bei der Instanz unter "Enthaltene Module" und in
 
 ## 3. Enthaltene Module
 
-* [IPS-WLANThermo](IPS-WLANThermo/README.md)
+* [WLANThermo](WLANThermo/README.md)
   * Verbindet ein WLANThermo per MQTT mit IP-Symcon und legt Variablen für Kanäle, Pitmaster und Systemwerte an.
   * Die Instanz hat eine Kachel für die Kachel-Visualisierung.
   * Die Instanz wird manuell angelegt, das MQTT Topic ist der Hostname des Geräts.
