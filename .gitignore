@@ -4,6 +4,5 @@ libs/composer.*
 libs/phpunit.*
 # Lokal (Regelwerk: standards/MODULE_STRUCTURE.md)
 docs/FORUM_POST.md
-docs/FORUM_CHANGELOG.md
 docs/adr/
 Thumbs.db
